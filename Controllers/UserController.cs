@@ -8,7 +8,7 @@ namespace UsersAPI.Controllers;
 public class UserController: Controller
 {
     [HttpGet("Login/{username}/{password}")]
-    public IResult login(string username, string password)
+    public IResult Login(string username, string password)
     {
         var connection = Database.GetConnection();
 

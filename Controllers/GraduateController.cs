@@ -23,14 +23,18 @@ public class GraduateController : Controller
                 statusCode: StatusCodes.Status200OK
             );
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            connection.Close();
+            Console.Error.WriteLine(ex.Message);
 
             return Results.Json(
                 data: new ErrorResult(0, "Unexpected server error"),
                 statusCode: StatusCodes.Status500InternalServerError
             );
+        }
+        finally
+        {
+            connection?.Close();
         }
     }
 
@@ -42,7 +46,24 @@ public class GraduateController : Controller
         try
         {
             var graduateDAO = new GraduateDAO(connection);
+            var nationalityDAO = new NationalityDAO(connection);
+
             var graduates = graduateDAO.PagingMinimum(offset, limit);
+
+            foreach (var graduate in graduates)
+            {
+                var nationality = nationalityDAO.GetNationality(graduate.id);
+
+                if (nationality == null)
+                {
+                    return Results.Json(
+                        data: new ErrorResult(0, "Failed to retrieve graduate nationality"),
+                        statusCode: StatusCodes.Status500InternalServerError
+                    );
+                }
+
+                graduate.nationality = nationality;
+            }
 
             return Results.Json(
                 data: graduates,
@@ -51,14 +72,16 @@ public class GraduateController : Controller
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
-
-            connection.Close();
+            Console.Error.WriteLine(ex.Message);
 
             return Results.Json(
                 data: new ErrorResult(0, "Unexpected server error"),
                 statusCode: StatusCodes.Status500InternalServerError
             );
+        }
+        finally
+        {
+            connection?.Close();
         }
     }
 
@@ -200,7 +223,7 @@ public class GraduateController : Controller
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex.ToString());
+            Console.Error.WriteLine(ex.Message);
 
             return Results.Json(
                 data: new ErrorResult(0, "Unexpected server error"),
@@ -223,9 +246,18 @@ public class GraduateController : Controller
             var GraduateContactDAO = new GraduateContactDAO(connection);
             return Results.Ok(GraduateContactDAO.GetTelephones(graduate_id));
         }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            return Results.Json(
+                data: new ErrorResult(0, "Unexpected server error"),
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
         finally
         {
-            connection.Close();
+            connection?.Close();
         }
     }
 
@@ -235,14 +267,21 @@ public class GraduateController : Controller
         var connection = Database.GetConnection();
         try
         {
-
             var GraduateContactDAO = new GraduateContactDAO(connection);
             return Results.Ok(GraduateContactDAO.GetEmails(graduate_id));
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
 
+            return Results.Json(
+                data: new ErrorResult(0, "Unexpected server error"),
+                statusCode: StatusCodes.Status500InternalServerError
+            );
         }
         finally
         {
-            connection.Close();
+            connection?.Close();
         }
     }
 
@@ -256,9 +295,18 @@ public class GraduateController : Controller
             var GraduateContactDAO = new GraduateContactDAO(connection);
             return Results.Ok(GraduateContactDAO.GetAddresses(graduate_id));
         }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            return Results.Json(
+                data: new ErrorResult(0, "Unexpected server error"),
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
         finally
         {
-            connection.Close();
+            connection?.Close();
         }
     }
 
@@ -350,6 +398,44 @@ public class GraduateController : Controller
         {
             var graduateDAO = new GraduateDAO(connection);
 
+            //Checking if the information in the token is the correct to perform
+            //the requested action
+
+            if (HttpContext.User.Identity is not ClaimsIdentity identity)
+            {
+                Console.Error.WriteLine("Failed to get the claims");
+
+                return Results.Json(
+                    data: new ErrorResult(0, "Unexpected server error"),
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
+
+            Claim? nameClaim = identity.FindFirst("name");
+
+            if (nameClaim == null)
+            {
+                Console.Error.WriteLine("Failed to get the name claim");
+
+                return Results.Json(
+                    data: new ErrorResult(0, "Unexpected server error"),
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
+
+            ulong? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
+
+            //Only if the graduate's id requested from the token and the graduate's id
+            //from the request (argument in the function) match, the operation can be carry out
+
+            if (graduate.id != retrievedGraduateId)
+            {
+                return Results.Json(
+                    data: new ErrorResult(0, "You don't have access to perform the requested action"),
+                    statusCode: StatusCodes.Status401Unauthorized
+                );
+            }
+
             if (!graduateDAO.Exists(graduate.id))
             {
                 return Results.BadRequest(new ErrorResult(0, $"Doesn't exists a graduate with submitted id"));
@@ -362,7 +448,7 @@ public class GraduateController : Controller
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Console.Error.WriteLine(ex.Message);
 
             return Results.Json(
                 data: new ErrorResult(0, "Unexpected server error"),
