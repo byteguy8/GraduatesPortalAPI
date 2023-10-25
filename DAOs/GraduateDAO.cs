@@ -1,18 +1,19 @@
-using MySqlConnector;
+using System.Data;
+using System.Data.SqlClient;
 
 public class GraduateDAO
 {
-    private readonly MySqlConnection connection;
+    private readonly SqlConnection connection;
 
-    public GraduateDAO(MySqlConnection connection)
+    public GraduateDAO(SqlConnection connection)
     {
         this.connection = connection;
     }
 
-    public ulong? GetGraduateIdByUsername(string username)
+    public int? GetGraduateIdByUsername(string username)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -20,13 +21,15 @@ public class GraduateDAO
 
             command.CommandText =
             @"SELECT
-                graduate_id
-            FROM graduate_user
-            WHERE user_id = (
+                EgresadoId
+            FROM Participante 
+            JOIN Egresado ON
+                Participante.ParticipanteId = Egresado.ParticipanteId
+            WHERE UsuarioId = (
                 SELECT
-                    id
-                FROM user
-                WHERE name = @name
+                    UsuarioID
+                FROM Usuario
+                WHERE UserName = @name
             );";
 
             command.Parameters.AddWithValue("@name", username);
@@ -38,7 +41,7 @@ public class GraduateDAO
                 return null;
             }
 
-            return reader.GetUInt64(0);
+            return reader.GetInt32(0);
         }
         finally
         {
@@ -47,10 +50,10 @@ public class GraduateDAO
         }
     }
 
-    public bool Exists(ulong graduateId)
+    public bool Exists(int graduateId)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -58,15 +61,15 @@ public class GraduateDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM graduate
-            WHERE id = @graduateId;";
+                COUNT(EgresadoId)
+            FROM Egresado
+            WHERE EgresadoId = @graduateId;";
 
             command.Parameters.AddWithValue("@graduateId", graduateId);
             reader = command.ExecuteReader();
 
             reader.Read();
-            return reader.GetInt64(0) == 1;
+            return reader.GetInt32(0) == 1;
         }
         finally
         {
@@ -77,8 +80,8 @@ public class GraduateDAO
 
     public bool ExistsIdentification(string identification)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -86,15 +89,15 @@ public class GraduateDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM graduate
-            WHERE identification = @identification;";
+                COUNT(EgresadoId)
+            FROM DocumentoEgresado
+            WHERE DocumentoNo = @identification;";
 
             command.Parameters.AddWithValue("@identification", identification);
             reader = command.ExecuteReader();
 
             reader.Read();
-            return reader.GetInt64(0) == 1;
+            return reader.GetInt32(0) == 1;
         }
         finally
         {
@@ -103,10 +106,10 @@ public class GraduateDAO
         }
     }
 
-    public ulong Count()
+    public int Count()
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -114,13 +117,13 @@ public class GraduateDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM graduate;";
+                COUNT(EgresadoId)
+            FROM Egresado;";
 
             reader = command.ExecuteReader();
 
             reader.Read();
-            return reader.GetUInt64(0);
+            return reader.GetInt32(0);
         }
         finally
         {
@@ -129,24 +132,24 @@ public class GraduateDAO
         }
     }
 
-    public bool JoinToUser(long graduateId, long userId)
+    public bool JoinToUser(int ParticipanteId, int userId)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"INSERT INTO graduate_user(
-                graduate_id,
-                user_id
+            @"INSERT INTO Participante(
+                ParticipanteId,
+                UsuarioId
             )VALUES(
-                @graduateId,
+                @ParticipanteId,
                 @userId
             );";
 
-            command.Parameters.AddWithValue("@graduateId", graduateId);
+            command.Parameters.AddWithValue("@graduateId", ParticipanteId);
             command.Parameters.AddWithValue("@userId", userId);
 
             return command.ExecuteNonQuery() == 1;
@@ -157,10 +160,10 @@ public class GraduateDAO
         }
     }
 
-    public List<GraduateMinimum> PagingMinimum(ulong offset, ulong limit)
+    public List<GraduateMinimum> PagingMinimum(int offset, int fetch)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -169,11 +172,16 @@ public class GraduateDAO
             command.CommandText =
             @"SELECT 
                 * 
-            FROM graduate
-            LIMIT @limit
-            OFFSET @offset";
+            FROM Egresado
+            JOIN DocumentoEgresado ON
+                Egresado.EgresadoId = DocumentoEgresado.EgresadoId
 
-            command.Parameters.AddWithValue("@limit", limit);
+			ORDER BY PrimerNombre
+
+			OFFSET @offset ROWS
+            FETCH NEXT @limit ROWS ONLY;";
+
+            command.Parameters.AddWithValue("@limit", fetch);
             command.Parameters.AddWithValue("@offset", offset);
 
             reader = command.ExecuteReader();
@@ -182,12 +190,12 @@ public class GraduateDAO
 
             while (reader.Read())
             {
-                var id = reader.GetUInt64("id");
-                var firstName = reader.GetString("first_name");
-                var lastName = reader.GetString("last_name");
-                var birthday = reader.GetDateTime("birthday").ToShortDateString();
-                var gender = reader.GetChar("gender");
-                var identification = reader.GetString("identification");
+                var id = reader.GetInt32("EgresadoId");
+                var firstName = reader.GetString("PrimerNombre");
+                var lastName = reader.GetString("PrimerApellido");
+                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
+                var gender = reader.GetChar("Genero");
+                var identification = reader.GetString("DocumentoNo");
 
                 var graduate = new GraduateMinimum
                 {
@@ -211,10 +219,10 @@ public class GraduateDAO
         }
     }
 
-    public List<Graduate> Paging(ulong offset, ulong limit)
+    public List<Graduate> Paging(int offset, int fetch)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -223,11 +231,16 @@ public class GraduateDAO
             command.CommandText =
             @"SELECT 
                 * 
-            FROM graduate
-            LIMIT @limit
-            OFFSET @offset;";
+            FROM Egresado
+            JOIN DocumentoEgresado ON
+                Egresado.EgresadoId = DocumentoEgresado.EgresadoId
 
-            command.Parameters.AddWithValue("@limit", limit);
+			ORDER BY PrimerNombre
+
+			OFFSET @offset ROWS
+            FETCH NEXT @limit ROWS ONLY;";
+
+            command.Parameters.AddWithValue("@limit", fetch);
             command.Parameters.AddWithValue("@offset", offset);
 
             reader = command.ExecuteReader();
@@ -236,12 +249,12 @@ public class GraduateDAO
 
             while (reader.Read())
             {
-                var id = reader.GetUInt64("id");
-                var firstName = reader.GetString("first_name");
-                var lastName = reader.GetString("last_name");
-                var birthday = reader.GetDateTime("birthday").ToShortDateString();
-                var gender = reader.GetChar("gender");
-                var identification = reader.GetString("identification");
+                var id = reader.GetInt32("EgresadoId");
+                var firstName = reader.GetString("PrimerNombre");
+                var lastName = reader.GetString("PrimerApellido");
+                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
+                var gender = reader.GetChar("Genero");
+                var identification = reader.GetString("DocumentoNo");
 
                 var graduate = new Graduate
                 {
@@ -268,10 +281,10 @@ public class GraduateDAO
         }
     }
 
-    public Graduate? Get(ulong graduateId)
+    public Graduate? Get(int graduateId)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -280,8 +293,8 @@ public class GraduateDAO
             command.CommandText =
             @"SELECT
                 *
-            FROM graduate
-            WHERE id = @graduateId";
+            FROM Egresado
+            WHERE EgresadoId = @graduateId";
 
             command.Parameters.AddWithValue("@graduateId", graduateId);
 
@@ -294,11 +307,12 @@ public class GraduateDAO
 
             reader.Read();
 
-            var firstName = reader.GetString("first_name");
-            var lastName = reader.GetString("last_name");
-            var birthday = reader.GetDateTime("birthday").ToShortDateString();
-            var gender = reader.GetChar("gender");
-            var identification = reader.GetString("identification");
+                var id = reader.GetInt32("EgresadoId");
+                var firstName = reader.GetString("PrimerNombre");
+                var lastName = reader.GetString("PrimerApellido");
+                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
+                var gender = reader.GetChar("Genero");
+                var identification = reader.GetString("DocumentoNo");
 
             return new Graduate
             {
@@ -319,8 +333,8 @@ public class GraduateDAO
 
     public List<GraduateMinimum> GetAllMinimum()
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -329,8 +343,8 @@ public class GraduateDAO
             command.CommandText =
             @"SELECT 
                 * 
-            FROM graduate
-            ORDER BY last_name";
+            FROM Egresado
+            ORDER BY PrimerApellido";
 
             reader = command.ExecuteReader();
 
@@ -338,12 +352,12 @@ public class GraduateDAO
 
             while (reader.Read())
             {
-                var id = reader.GetUInt64("id");
-                var firstName = reader.GetString("first_name");
-                var lastName = reader.GetString("last_name");
-                var birthday = reader.GetDateTime("birthday").ToShortDateString();
-                var gender = reader.GetChar("gender");
-                var identification = reader.GetString("identification");
+                var id = reader.GetInt32("EgresadoId");
+                var firstName = reader.GetString("PrimerNombre");
+                var lastName = reader.GetString("PrimerApellido");
+                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
+                var gender = reader.GetChar("Genero");
+                var identification = reader.GetString("DocumentoNo");
 
                 var graduate = new GraduateMinimum
                 {
@@ -369,8 +383,8 @@ public class GraduateDAO
 
     public List<Graduate> GetAll()
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -379,8 +393,8 @@ public class GraduateDAO
             command.CommandText =
             @"SELECT 
                 *
-            FROM graduate
-            ORDER BY last_name";
+            FROM Egresado
+            ORDER BY PrimerApellido";
 
             reader = command.ExecuteReader();
 
@@ -388,12 +402,12 @@ public class GraduateDAO
 
             while (reader.Read())
             {
-                var id = reader.GetUInt64("id");
-                var firstName = reader.GetString("first_name");
-                var lastName = reader.GetString("last_name");
-                var birthday = reader.GetDateTime("birthday").ToShortDateString();
-                var gender = reader.GetChar("gender");
-                var identification = reader.GetString("identification");
+                var id = reader.GetInt32("EgresadoId");
+                var firstName = reader.GetString("PrimerNombre");
+                var lastName = reader.GetString("PrimerApellido");
+                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
+                var gender = reader.GetChar("Genero");
+                var identification = reader.GetString("DocumentoNo");
 
                 var graduate = new Graduate
                 {
@@ -417,22 +431,22 @@ public class GraduateDAO
         }
     }
 
-    public long Create(Graduate graduate)
+    public int Create(Graduate graduate)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"INSERT INTO graduate(
-                first_name,
-                last_name,
-                birthday,
-                gender,
-                identification,
-                nationality_id
+            @"INSERT INTO Egresado(
+                PrimerNombre,
+                PrimerApellido,
+                FechaNac,
+                Genero,
+                DocumentoNo,
+                Nacionalidad
             )VALUES(
                 @firstName,
                 @lastName,
@@ -453,7 +467,7 @@ public class GraduateDAO
 
             if (count == 1)
             {
-                return command.LastInsertedId;
+                return Convert.ToInt32(command.ExecuteScalar());
             }
             else
             {
@@ -468,21 +482,21 @@ public class GraduateDAO
 
     public bool Update(GraduateMinimum graduate)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"UPDATE graduate SET
-                first_name = @firstName,
-                last_name = @lastName,
-                birthday = @birthDay,
-                gender = @gender,
-                identification = @identification,
-                nationality_id = @nationalityId
-            WHERE id = @graduateId";
+            @"UPDATE Egresado SET
+                PrimerNombre = @firstName,
+                SegundoApellido = @lastName,
+                FechaNac = @birthDay,
+                Genero = @gender,
+                DocumentoNo = @identification,
+                Nacionalidad = @nationalityId
+            WHERE EgresadoId = @graduateId";
 
             command.Parameters.AddWithValue("@firstName", graduate.firstName);
             command.Parameters.AddWithValue("@lastName", graduate.lastName);
@@ -500,17 +514,17 @@ public class GraduateDAO
         }
     }
 
-    public bool Delete(ulong graduateId)
+    public bool Delete(int graduateId)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"DELETE FROM graduate
-            WHERE id = @graduateId";
+            @"DELETE FROM Egresado
+            WHERE EgresadoId = @graduateId";
 
             command.Parameters.AddWithValue("@graduateId", graduateId);
 

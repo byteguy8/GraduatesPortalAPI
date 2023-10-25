@@ -39,7 +39,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("Paging/{offset}/{limit}")]
-    public IResult Paging(ulong offset, ulong limit)
+    public IResult Paging(int offset, int fetch)
     {
         var connection = Database.GetConnection();
 
@@ -48,7 +48,7 @@ public class GraduateController : Controller
             var graduateDAO = new GraduateDAO(connection);
             var nationalityDAO = new NationalityDAO(connection);
 
-            var graduates = graduateDAO.PagingMinimum(offset, limit);
+            var graduates = graduateDAO.PagingMinimum(offset, fetch);
 
             foreach (var graduate in graduates)
             {
@@ -86,7 +86,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("{graduateId}"), Authorize]
-    public IResult GetById(ulong graduateId)
+    public IResult GetById(int graduateId)
     {
         if (HttpContext.User.Identity is not ClaimsIdentity identity)
         {
@@ -115,7 +115,7 @@ public class GraduateController : Controller
                 );
             }
 
-            ulong? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
+            int? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
 
             if (graduateId != retrievedGraduateId)
             {
@@ -237,7 +237,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("Telephones")]
-    public IResult GetTelephones(ulong graduate_id)
+    public IResult GetTelephones(int graduate_id)
     {
         var connection = Database.GetConnection();
 
@@ -262,7 +262,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("Emails")]
-    public IResult GetEmails(ulong graduate_id)
+    public IResult GetEmails(int graduate_id)
     {
         var connection = Database.GetConnection();
         try
@@ -286,7 +286,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("Addresses")]
-    public IResult GetAddresses(ulong graduate_id)
+    public IResult GetAddresses(int graduate_id)
     {
         var connection = Database.GetConnection();
 
@@ -423,7 +423,7 @@ public class GraduateController : Controller
                 );
             }
 
-            ulong? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
+            int? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
 
             //Only if the graduate's id requested from the token and the graduate's id
             //from the request (argument in the function) match, the operation can be carry out
@@ -463,7 +463,7 @@ public class GraduateController : Controller
 
     [Authorize]
     [HttpDelete("{graduateId}")]
-    public IResult Delete(ulong graduateId)
+    public IResult Delete(int graduateId)
     {
         var connection = Database.GetConnection();
         var transaction = connection.BeginTransaction();
@@ -499,7 +499,7 @@ public class GraduateController : Controller
                 );
             }
 
-            ulong? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
+            int? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
 
             //Only if the graduate's id requested from the token and the graduate's id
             //from the request (argument in the function) match, the operation can be carry out
