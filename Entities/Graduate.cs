@@ -1,14 +1,19 @@
 public class Graduate
 {
     public int id { get; set; }
-    public string firstName { get; set; }
-    public string lastName { get; set; }
-    public string birthday { get; set; }
-    public char gender { get; set; }
-    public string identification { get; set; }
-    public Nationality nationality { get; set; }
-    public User user { get; set; }
-    public List<string> telephones { get; set; }
-    public List<string> emails { get; set; }
-    public List<string> addresses { get; set; }
+    public int ParticipanteId { get; set; }
+    public String? Identificacion { get; set; }
+    public string? PrimerNombre { get; set; }
+    public string? SegundoNombre { get; set; }
+    public string? PrimerApellido { get; set; }
+    public string? SegundoApellido { get; set; }
+    public char Genero { get; set; }
+    public string? FechaNac { get; set; }
+    public string? MatriculaGrado { get; set; }
+    public string? MatriculaEgresado { get; set; }
+    public Nationality? Nacionalidad { get; set; }
+    public User? user { get; set; }
+    public List<string>? telephones { get; set; }
+    public List<string>? emails { get; set; }
+    public List<string>? addresses { get; set; }
 }

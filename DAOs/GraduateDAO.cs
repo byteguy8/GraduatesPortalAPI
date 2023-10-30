@@ -179,9 +179,9 @@ public class GraduateDAO
 			ORDER BY PrimerNombre
 
 			OFFSET @offset ROWS
-            FETCH NEXT @limit ROWS ONLY;";
+            FETCH NEXT @fetch ROWS ONLY;";
 
-            command.Parameters.AddWithValue("@limit", fetch);
+            command.Parameters.AddWithValue("@fetch", fetch);
             command.Parameters.AddWithValue("@offset", offset);
 
             reader = command.ExecuteReader();
@@ -191,20 +191,20 @@ public class GraduateDAO
             while (reader.Read())
             {
                 var id = reader.GetInt32("EgresadoId");
-                var firstName = reader.GetString("PrimerNombre");
-                var lastName = reader.GetString("PrimerApellido");
-                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
-                var gender = reader.GetChar("Genero");
-                var identification = reader.GetString("DocumentoNo");
+                var PrimerNombre = reader.GetString("PrimerNombre");
+                var PrimerApellido = reader.GetString("PrimerApellido");
+                var FechaNac = reader.GetDateTime("FechaNac").ToShortDateString();
+                var Genero = reader.GetChar("Genero");
+                var Identificacion = reader.GetString("DocumentoNo");
 
                 var graduate = new GraduateMinimum
                 {
                     id = id,
-                    firstName = firstName,
-                    lastName = lastName,
-                    birthday = birthday,
-                    gender = gender,
-                    identification = identification
+                    PrimerNombre = PrimerNombre,
+                    PrimerApellido = PrimerApellido,
+                    FechaNac = FechaNac,
+                    Genero = Genero,
+                    Identificacion = Identificacion
                 };
 
                 graduates.Add(graduate);
@@ -250,23 +250,23 @@ public class GraduateDAO
             while (reader.Read())
             {
                 var id = reader.GetInt32("EgresadoId");
-                var firstName = reader.GetString("PrimerNombre");
-                var lastName = reader.GetString("PrimerApellido");
-                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
-                var gender = reader.GetChar("Genero");
-                var identification = reader.GetString("DocumentoNo");
+                var PrimerNombre = reader.GetString("PrimerNombre");
+                var PrimerApellido = reader.GetString("PrimerApellido");
+                var FechaNac = reader.GetDateTime("FechaNac").ToShortDateString();
+                var Genero = reader.GetChar("Genero");
+                var Identificacion = reader.GetString("DocumentoNo");
 
                 var graduate = new Graduate
                 {
                     id = id,
-                    firstName = firstName,
-                    lastName = lastName,
-                    birthday = birthday,
-                    gender = gender,
-                    identification = identification,
-                    emails = new List<string>(),
+                    PrimerNombre = PrimerNombre,
+                    PrimerApellido = PrimerApellido,
+                    FechaNac = FechaNac,
+                    Genero = Genero,
+                    Identificacion = Identificacion
+                    /*emails = new List<string>(),
                     telephones = new List<string>(),
-                    addresses = new List<string>()
+                    addresses = new List<string>()*/
                 };
 
                 graduates.Add(graduate);
@@ -308,20 +308,18 @@ public class GraduateDAO
             reader.Read();
 
                 var id = reader.GetInt32("EgresadoId");
-                var firstName = reader.GetString("PrimerNombre");
-                var lastName = reader.GetString("PrimerApellido");
-                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
-                var gender = reader.GetChar("Genero");
-                var identification = reader.GetString("DocumentoNo");
+                var PrimerNombre = reader.GetString("PrimerNombre");
+                var PrimerApellido = reader.GetString("PrimerApellido");
+                var FechaNac = reader.GetDateTime("FechaNac").ToShortDateString();
+                var Genero = reader.GetChar("Genero");
 
             return new Graduate
             {
                 id = graduateId,
-                firstName = firstName,
-                lastName = lastName,
-                birthday = birthday,
-                gender = gender,
-                identification = identification
+                PrimerNombre = PrimerNombre,
+                PrimerApellido = PrimerApellido,
+                FechaNac = FechaNac,
+                Genero = Genero
             };
         }
         finally
@@ -344,7 +342,10 @@ public class GraduateDAO
             @"SELECT 
                 * 
             FROM Egresado
-            ORDER BY PrimerApellido";
+            JOIN DocumentoEgresado ON
+                Egresado.EgresadoId = DocumentoEgresado.EgresadoId
+
+			ORDER BY PrimerApellido";
 
             reader = command.ExecuteReader();
 
@@ -353,20 +354,18 @@ public class GraduateDAO
             while (reader.Read())
             {
                 var id = reader.GetInt32("EgresadoId");
-                var firstName = reader.GetString("PrimerNombre");
-                var lastName = reader.GetString("PrimerApellido");
-                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
-                var gender = reader.GetChar("Genero");
-                var identification = reader.GetString("DocumentoNo");
+                var PrimerNombre = reader.GetString("PrimerNombre");
+                var PrimerApellido = reader.GetString("PrimerApellido");
+                var FechaNac = reader.GetDateTime("FechaNac").ToShortDateString();
+                var Genero = reader.GetChar("Genero");
 
                 var graduate = new GraduateMinimum
                 {
                     id = id,
-                    firstName = firstName,
-                    lastName = lastName,
-                    birthday = birthday,
-                    gender = gender,
-                    identification = identification
+                    PrimerNombre = PrimerNombre,
+                    PrimerApellido = PrimerApellido,
+                    FechaNac = FechaNac,
+                    Genero = Genero
                 };
 
                 graduates.Add(graduate);
@@ -403,20 +402,20 @@ public class GraduateDAO
             while (reader.Read())
             {
                 var id = reader.GetInt32("EgresadoId");
-                var firstName = reader.GetString("PrimerNombre");
-                var lastName = reader.GetString("PrimerApellido");
-                var birthday = reader.GetDateTime("FechaNac").ToShortDateString();
-                var gender = reader.GetChar("Genero");
-                var identification = reader.GetString("DocumentoNo");
+                var PrimerNombre = reader.GetString("PrimerNombre");
+                var PrimerApellido = reader.GetString("PrimerApellido");
+                var FechaNac = reader.GetDateTime("FechaNac").ToShortDateString();
+                var Genero = reader.GetChar("Genero");
+                var identificacion = reader.GetString("DocumentoNo");
 
                 var graduate = new Graduate
                 {
                     id = id,
-                    firstName = firstName,
-                    lastName = lastName,
-                    birthday = birthday,
-                    gender = gender,
-                    identification = identification
+                    PrimerNombre = PrimerNombre,
+                    PrimerApellido = PrimerApellido,
+                    FechaNac = FechaNac,
+                    Genero = Genero,
+                    Identificacion = identificacion
                 };
 
                 graduates.Add(graduate);
@@ -441,27 +440,39 @@ public class GraduateDAO
 
             command.CommandText =
             @"INSERT INTO Egresado(
+                ParticipanteId,
+                Nacionalidad,
                 PrimerNombre,
+                SegundoNombre,
                 PrimerApellido,
-                FechaNac,
+                SegundoApellido,
                 Genero,
-                DocumentoNo,
-                Nacionalidad
+                FechaNac,
+                MatriculaGrado,
+                MatriculaEgresado
             )VALUES(
-                @firstName,
-                @lastName,
-                @birthday,
-                @gender,
-                @identification,
-                @nationalityId
+                @ParticipanteId,
+                @NacionalidadId,
+                @PrimerNombre,
+                @SegundoNombre,
+                @PrimerApellido,
+                @SegundoApellido,
+                @Genero,
+                @FechaNac,
+                @MatriculaGrado,
+                @MatriculaEgresado
             );";
 
-            command.Parameters.AddWithValue("@firstName", graduate.firstName);
-            command.Parameters.AddWithValue("@lastName", graduate.lastName);
-            command.Parameters.AddWithValue("@birthday", graduate.birthday);
-            command.Parameters.AddWithValue("@gender", graduate.gender);
-            command.Parameters.AddWithValue("@identification", graduate.identification);
-            command.Parameters.AddWithValue("@nationalityId", graduate.nationality.id);
+            command.Parameters.AddWithValue("@ParticipanteId", graduate.ParticipanteId);
+            command.Parameters.AddWithValue("@NacionalidadId", graduate.Nacionalidad);
+            command.Parameters.AddWithValue("@PrimerNombre", graduate.PrimerNombre);
+            command.Parameters.AddWithValue("@SegundoNombre", graduate.SegundoNombre);
+            command.Parameters.AddWithValue("@PrimerApellido", graduate.PrimerApellido);
+            command.Parameters.AddWithValue("@SegundoApellido", graduate.SegundoApellido);
+            command.Parameters.AddWithValue("@Genero", graduate.Genero);
+            command.Parameters.AddWithValue("@FechaNac", graduate.FechaNac);
+            command.Parameters.AddWithValue("@MatriculaGrado", graduate.MatriculaGrado);
+            command.Parameters.AddWithValue("@MatriculaEgresado", graduate.MatriculaEgresado);
 
             int count = command.ExecuteNonQuery();
 
@@ -490,20 +501,24 @@ public class GraduateDAO
 
             command.CommandText =
             @"UPDATE Egresado SET
-                PrimerNombre = @firstName,
-                SegundoApellido = @lastName,
-                FechaNac = @birthDay,
-                Genero = @gender,
-                DocumentoNo = @identification,
-                Nacionalidad = @nationalityId
+                ParticipanteId = @ParticipanteId,
+                Nacionalidad =  @NacionalidadId,
+                PrimerNombre = @PrimerNombre,
+                SegundoNombre = @SegundoNombre,
+                PrimerApellido = @PrimerApellido,
+                SegundoApellido = @SegundoApellido,
+                Genero = @Genero,
+                FechaNac = @FechaNac
             WHERE EgresadoId = @graduateId";
 
-            command.Parameters.AddWithValue("@firstName", graduate.firstName);
-            command.Parameters.AddWithValue("@lastName", graduate.lastName);
-            command.Parameters.AddWithValue("@birthday", graduate.birthday);
-            command.Parameters.AddWithValue("@gender", graduate.gender);
-            command.Parameters.AddWithValue("@identification", graduate.identification);
-            command.Parameters.AddWithValue("@nationalityId", graduate.nationality.id);
+            command.Parameters.AddWithValue("@ParticipanteId", graduate.ParticipanteId);
+            command.Parameters.AddWithValue("@NacionalidadId", graduate.Nacionalidad);
+            command.Parameters.AddWithValue("@PrimerNombre", graduate.PrimerNombre);
+            command.Parameters.AddWithValue("@SegundoNombre", graduate.SegundoNombre);
+            command.Parameters.AddWithValue("@PrimerApellido", graduate.PrimerApellido);
+            command.Parameters.AddWithValue("@SegundoApellido", graduate.SegundoApellido);
+            command.Parameters.AddWithValue("@Genero", graduate.Genero);
+            command.Parameters.AddWithValue("@FechaNac", graduate.FechaNac);
             command.Parameters.AddWithValue("@graduateId", graduate.id);
 
             return command.ExecuteNonQuery() == 1;

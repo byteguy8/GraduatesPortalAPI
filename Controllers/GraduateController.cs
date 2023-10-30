@@ -38,7 +38,7 @@ public class GraduateController : Controller
         }
     }
 
-    [HttpGet("Paging/{offset}/{limit}")]
+    [HttpGet("Paging/{offset}/{fetch}")]
     public IResult Paging(int offset, int fetch)
     {
         var connection = Database.GetConnection();
@@ -62,7 +62,7 @@ public class GraduateController : Controller
                     );
                 }
 
-                graduate.nationality = nationality;
+                graduate.Nacionalidad = nationality;
             }
 
             return Results.Json(
@@ -164,7 +164,7 @@ public class GraduateController : Controller
             }
 
             graduate.user = user;
-            graduate.nationality = nationality;
+            graduate.Nacionalidad = nationality;
             graduate.emails = graduateContactDAO.GetEmails(graduate.id);
             graduate.addresses = graduateContactDAO.GetAddresses(graduate.id);
             graduate.telephones = graduateContactDAO.GetTelephones(graduate.id);
@@ -213,7 +213,7 @@ public class GraduateController : Controller
                     );
                 }
 
-                graduate.nationality = nationality;
+                graduate.Nacionalidad = nationality;
             }
 
             return Results.Json(
@@ -322,10 +322,10 @@ public class GraduateController : Controller
             var graduateDAO = new GraduateDAO(connection);
             var GraduateContactDAO = new GraduateContactDAO(connection);
 
-            if (graduateDAO.ExistsIdentification(graduate.identification))
+            if (graduateDAO.ExistsIdentification(graduate.Identificacion))
             {
                 transaction.Rollback();
-                return Results.BadRequest(new ErrorResult(0, "There is another graduate with the same identification"));
+                return Results.BadRequest(new ErrorResult(0, "Existe otro egresado con la misma identificación."));
             }
 
             if (userDAO.Exists(graduate.user.name))
@@ -355,7 +355,7 @@ public class GraduateController : Controller
                 GraduateContactDAO.CreateEmail(graduateId, email);
             }
 
-            foreach (string telephone in graduate.telephones)
+           /* foreach (string telephone in graduate.telephones)
             {
                 if (GraduateContactDAO.ExistsTelephone(telephone))
                 {
@@ -364,7 +364,7 @@ public class GraduateController : Controller
                 }
 
                 GraduateContactDAO.CreateTelephone(graduateId, telephone);
-            }
+            }*/
 
             transaction.Commit();
 

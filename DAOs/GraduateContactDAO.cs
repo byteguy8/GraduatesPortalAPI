@@ -10,7 +10,7 @@ public class GraduateContactDAO
         this.connection = connection;
     }
 
-    public bool ExistsTelephone(string telephone)
+    /*public bool ExistsTelephone(string telephone)
     {
         SqlCommand? command = null;
         SqlDataReader? reader = null;
@@ -21,22 +21,22 @@ public class GraduateContactDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM graduate_telephone
+                COUNT(Nombre)
+            FROM Contacto
             WHERE value = @value;";
 
             command.Parameters.AddWithValue("@value", telephone);
             reader = command.ExecuteReader();
 
             reader.Read();
-            return reader.GetInt64(0) == 1;
+            return reader.GetInt32(0) == 1;
         }
         finally
         {
             reader?.Close();
             command?.Dispose();
         }
-    }
+    }*/
 
     public bool ExistsEmail(string email)
     {
@@ -49,15 +49,15 @@ public class GraduateContactDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM graduate_email
+                COUNT(Nombre)
+            FROM Contacto
             WHERE value = @value;";
 
             command.Parameters.AddWithValue("@value", email);
             reader = command.ExecuteReader();
 
             reader.Read();
-            return reader.GetInt64(0) == 1;
+            return reader.GetInt32(0) == 1;
         }
         finally
         {
@@ -86,7 +86,7 @@ public class GraduateContactDAO
 
             if (reader.Read())
             {
-                return reader.GetInt64(0);
+                return reader.GetInt32(0);
             }
 
             return 0;
@@ -118,7 +118,7 @@ public class GraduateContactDAO
 
             if (reader.Read())
             {
-                return reader.GetInt64(0);
+                return reader.GetInt32(0);
             }
 
             return 0;
@@ -150,7 +150,7 @@ public class GraduateContactDAO
 
             if (reader.Read())
             {
-                return reader.GetInt64(0);
+                return reader.GetInt32(0);
             }
 
             return 0;
