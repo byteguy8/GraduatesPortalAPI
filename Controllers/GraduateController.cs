@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using GraduatesPortalAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace UsersAPI.Controllers;
 
@@ -9,6 +11,78 @@ namespace UsersAPI.Controllers;
 
 public class GraduateController : Controller
 {
+    [HttpGet("Busqueda")]
+
+    public IResult Busqueda(String valor){
+
+        PortalEgresadosContext? context = null;
+
+        try
+        {
+            context = new PortalEgresadosContext();
+
+            var busqueda = context
+                .Egresados
+                .Where(b => EF.Functions.Like(b.PrimerNombre, $"%{valor}%") || EF.Functions.Like (b.PrimerApellido, $"%{valor}%" ))
+                .ToList();
+
+            var Egresado = new List<Egresado>();    
+
+            foreach (var item in busqueda){
+
+                var EgresadoId = item.EgresadoId;
+                var PrimerNombre = item.PrimerNombre;
+                var SegundoNombre = item.SegundoNombre;
+                var PrimerApellido = item.PrimerApellido;
+                var SegundoApellido = item.SegundoApellido;
+                var DocumentoEgresados = item.DocumentoEgresados;
+                var Genero = item.Genero;
+                var FechaNac = item.FechaNac;
+                var FotoPerfilUrl = item.Participante.FotoPerfilUrl;
+                var Nacionalidad = item.NacionalidadNavigation.Nombre;
+                var EgresadoIdioma = item.EgresadoIdiomas;
+                var ExperienciaLaboral = item.ExperienciaLaborals;
+                var Educacion = item.Educacions;
+                var Contacto = item.Participante.Contactos;
+                var EgresadoHabilidad = item.EgresadoHabilidads;
+
+
+                var Egresados = new Egresado
+                {
+                    EgresadoId = EgresadoId,
+                    PrimerNombre = PrimerNombre,
+                    SegundoNombre = SegundoNombre,
+                    PrimerApellido = PrimerApellido,
+                    SegundoApellido = SegundoApellido,
+                    DocumentoEgresados = DocumentoEgresados,
+                    Genero = Genero,
+                    FechaNac = FechaNac,
+                    EgresadoIdiomas = EgresadoIdioma,
+                    ExperienciaLaborals = item.ExperienciaLaborals,
+                    Educacions = item.Educacions,
+                    EgresadoHabilidads = item.EgresadoHabilidads
+                };
+
+                Egresado.Add(Egresados);
+            }
+
+            return Results.Json(
+                data: Egresado,
+                statusCode: StatusCodes.Status200OK
+            );
+        }
+        
+                catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            return Results.Json(
+                data: new ErrorResult(0, "Unexpected server error"),
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
+
     [HttpGet("Count")]
     public IResult Count()
     {

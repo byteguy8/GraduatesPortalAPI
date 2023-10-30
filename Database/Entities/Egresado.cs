@@ -19,7 +19,7 @@ public partial class Egresado
 
     public string? SegundoApellido { get; set; }
 
-    public string Genero { get; set; } = null!;
+    public char Genero { get; set; }
 
     public DateTime FechaNac { get; set; }
 
