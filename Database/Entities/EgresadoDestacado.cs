@@ -13,6 +13,10 @@ public partial class EgresadoDestacado
 
     public DateTime FechaHasta { get; set; }
 
+    public int? Orden { get; set; }
+
+    public string? Observacion { get; set; }
+
     public bool? Estado { get; set; }
 
     public DateTime? FechaCreacion { get; set; }

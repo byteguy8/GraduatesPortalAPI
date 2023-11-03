@@ -9,7 +9,7 @@ public partial class Direccion
 
     public int LocalidadPostalId { get; set; }
 
-    public string? DireccionPrincipal { get; set; }
+    public string DireccionPrincipal { get; set; } = null!;
 
     public bool? MostrarDireccionPrincipal { get; set; }
 

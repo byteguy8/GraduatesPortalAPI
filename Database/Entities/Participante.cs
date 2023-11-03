@@ -27,7 +27,9 @@ public partial class Participante
 
     public virtual Direccion Direccion { get; set; } = null!;
 
-    public virtual ICollection<Egresado> Egresados { get; set; } = new List<Egresado>();
+    public virtual ICollection<Documento> Documentos { get; set; } = new List<Documento>();
+
+    public virtual Egresado? Egresado { get; set; }
 
     public virtual TipoParticipante TipoParticipante { get; set; } = null!;
 

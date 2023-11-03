@@ -17,6 +17,8 @@ public partial class Educacion
 
     public DateTime FechaSalida { get; set; }
 
+    public DateTime? FechaGraduacion { get; set; }
+
     public bool? Mostrar { get; set; }
 
     public bool? Estado { get; set; }

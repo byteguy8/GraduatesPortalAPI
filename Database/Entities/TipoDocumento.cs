@@ -15,5 +15,5 @@ public partial class TipoDocumento
 
     public DateTime? FechaModificacion { get; set; }
 
-    public virtual ICollection<DocumentoEgresado> DocumentoEgresados { get; set; } = new List<DocumentoEgresado>();
+    public virtual ICollection<Documento> Documentos { get; set; } = new List<Documento>();
 }

@@ -9,7 +9,7 @@ public partial class LocalidadPostal
 
     public int CiudadId { get; set; }
 
-    public string? Nombre { get; set; }
+    public string Nombre { get; set; } = null!;
 
     public string CodigoPostal { get; set; } = null!;
 

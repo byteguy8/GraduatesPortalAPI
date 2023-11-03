@@ -9,13 +9,15 @@ public partial class ExperienciaLaboral
 
     public int EgresadoId { get; set; }
 
-    public string Posicion { get; set; } = null!;
+    public string Organizacion { get; set; } = null!;
 
-    public int? Salario { get; set; }
+    public string Posicion { get; set; } = null!;
 
     public DateTime FechaEntrada { get; set; }
 
     public DateTime? FechaSalida { get; set; }
+
+    public string? Acerca { get; set; }
 
     public bool? Mostrar { get; set; }
 

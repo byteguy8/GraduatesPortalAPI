@@ -29,13 +29,13 @@ public partial class Egresado
 
     public string MatriculaEgresado { get; set; } = null!;
 
+    public string? Acerca { get; set; }
+
     public bool? Estado { get; set; }
 
     public DateTime? FechaCreacion { get; set; }
 
     public DateTime? FechaModificacion { get; set; }
-
-    public virtual ICollection<DocumentoEgresado> DocumentoEgresados { get; set; } = new List<DocumentoEgresado>();
 
     public virtual ICollection<Educacion> Educacions { get; set; } = new List<Educacion>();
 
