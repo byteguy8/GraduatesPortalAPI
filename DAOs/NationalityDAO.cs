@@ -1,18 +1,19 @@
-using MySqlConnector;
+using System.Data;
+using System.Data.SqlClient;
 
 public class NationalityDAO
 {
-    private readonly MySqlConnection connection;
+    private readonly SqlConnection connection;
 
-    public NationalityDAO(MySqlConnection connection)
+    public NationalityDAO(SqlConnection connection)
     {
         this.connection = connection;
     }
 
     public List<Nationality> GetAll()
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -21,8 +22,8 @@ public class NationalityDAO
             command.CommandText =
             @"SELECT 
                 * 
-            FROM nationality 
-            ORDER BY name";
+            FROM Pais 
+            ORDER BY Nombre";
 
             reader = command.ExecuteReader();
 
@@ -30,8 +31,8 @@ public class NationalityDAO
 
             while (reader.Read())
             {
-                var id = reader.GetUInt64("id");
-                var name = reader.GetString("name");
+                var id = reader.GetInt32("PaisId");
+                var name = reader.GetString("Nombre");
 
                 var nationality = new Nationality
                 {
@@ -51,10 +52,10 @@ public class NationalityDAO
         }
     }
 
-    public Nationality? GetNationality(ulong graduateId)
+    public Nationality? GetNationality(int graduateId)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -64,12 +65,12 @@ public class NationalityDAO
             @"SELECT
 	              *
               FROM
-	              nationality
-              INNER JOIN graduate
+	              Pais
+              INNER JOIN Egresado
                           ON
-	              nationality.ID = graduate.nationality_id
+	              Pais.PaisId = Egresado.Nacionalidad
               WHERE
-	              graduate.id= @graduate_id;";
+	              Egresado.EgresadoId= @graduate_id;";
 
             command.Parameters.AddWithValue("@graduate_id", graduateId);
             reader = command.ExecuteReader();
@@ -78,8 +79,8 @@ public class NationalityDAO
             {
                 reader.Read();
 
-                var id = reader.GetUInt64("id");
-                var name = reader.GetString("name");
+                var id = reader.GetInt32("PaisId");
+                var name = reader.GetString("Pais");
 
                 return new Nationality
                 {

@@ -1,18 +1,19 @@
-using MySqlConnector;
+using System.Data.SqlClient;
+using System.Data;
 
 public class GraduateContactDAO
 {
-    private readonly MySqlConnection connection;
+    private readonly SqlConnection connection;
 
-    public GraduateContactDAO(MySqlConnection connection)
+    public GraduateContactDAO(SqlConnection connection)
     {
         this.connection = connection;
     }
 
-    public bool ExistsTelephone(string telephone)
+    /*public bool ExistsTelephone(string telephone)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -20,27 +21,27 @@ public class GraduateContactDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM graduate_telephone
+                COUNT(Nombre)
+            FROM Contacto
             WHERE value = @value;";
 
             command.Parameters.AddWithValue("@value", telephone);
             reader = command.ExecuteReader();
 
             reader.Read();
-            return reader.GetInt64(0) == 1;
+            return reader.GetInt32(0) == 1;
         }
         finally
         {
             reader?.Close();
             command?.Dispose();
         }
-    }
+    }*/
 
     public bool ExistsEmail(string email)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -48,15 +49,15 @@ public class GraduateContactDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM graduate_email
+                COUNT(Nombre)
+            FROM Contacto
             WHERE value = @value;";
 
             command.Parameters.AddWithValue("@value", email);
             reader = command.ExecuteReader();
 
             reader.Read();
-            return reader.GetInt64(0) == 1;
+            return reader.GetInt32(0) == 1;
         }
         finally
         {
@@ -65,10 +66,10 @@ public class GraduateContactDAO
         }
     }
 
-    public ulong CountTelephones(ulong graduateId)
+    public long CountTelephones(long graduateId)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -85,7 +86,7 @@ public class GraduateContactDAO
 
             if (reader.Read())
             {
-                return reader.GetUInt64(0);
+                return reader.GetInt32(0);
             }
 
             return 0;
@@ -97,10 +98,10 @@ public class GraduateContactDAO
         }
     }
 
-    public ulong CountEmails(ulong graduateId)
+    public long CountEmails(long graduateId)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -117,7 +118,7 @@ public class GraduateContactDAO
 
             if (reader.Read())
             {
-                return reader.GetUInt64(0);
+                return reader.GetInt32(0);
             }
 
             return 0;
@@ -129,10 +130,10 @@ public class GraduateContactDAO
         }
     }
 
-    public ulong CountAddresses(ulong graduateId)
+    public long CountAddresses(long graduateId)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -149,7 +150,7 @@ public class GraduateContactDAO
 
             if (reader.Read())
             {
-                return reader.GetUInt64(0);
+                return reader.GetInt32(0);
             }
 
             return 0;
@@ -163,7 +164,7 @@ public class GraduateContactDAO
 
     public bool CreateTelephone(long graduateId, string telephone)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
@@ -191,7 +192,7 @@ public class GraduateContactDAO
 
     public bool CreateAddress(long graduateId, string address)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
@@ -219,7 +220,7 @@ public class GraduateContactDAO
 
     public bool CreateEmail(long graduateId, string telephone)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
@@ -245,9 +246,9 @@ public class GraduateContactDAO
         }
     }
 
-    public bool DeleteTelephones(ulong graduateId)
+    public bool DeleteTelephones(long graduateId)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
@@ -267,9 +268,9 @@ public class GraduateContactDAO
         }
     }
 
-    public bool DeleteEmails(ulong graduateId)
+    public bool DeleteEmails(long graduateId)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
@@ -289,9 +290,9 @@ public class GraduateContactDAO
         }
     }
 
-    public bool DeleteAddresses(ulong graduateId)
+    public bool DeleteAddresses(long graduateId)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
@@ -312,10 +313,10 @@ public class GraduateContactDAO
     }
 
     //OBTENER DATOS DE CONTACTOS
-    public List<string> GetTelephones(ulong graduate_id)
+    public List<string> GetTelephones(long graduate_id)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         List<string> telephones = new List<string>();
 
@@ -347,10 +348,10 @@ public class GraduateContactDAO
         }
     }
 
-    public List<string> GetEmails(ulong graduate_id)
+    public List<string> GetEmails(long graduate_id)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         var emails = new List<string>();
 
@@ -382,10 +383,10 @@ public class GraduateContactDAO
         }
     }
 
-    public List<string> GetAddresses(ulong graduate_id)
+    public List<string> GetAddresses(long graduate_id)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         var Addresses = new List<string>();
 

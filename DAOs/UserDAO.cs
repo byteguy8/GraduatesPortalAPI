@@ -2,21 +2,22 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using MySqlConnector;
+using System.Data.SqlClient;
+using System.Data;
 
 public class UserDAO
 {
-    private readonly MySqlConnection connection;
+    private readonly SqlConnection connection;
 
-    public UserDAO(MySqlConnection connection)
+    public UserDAO(SqlConnection connection)
     {
         this.connection = connection;
     }
 
     public string? Login(User user)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -25,9 +26,9 @@ public class UserDAO
             command.CommandText =
             @"SELECT
                 *
-            FROM user
-            WHERE name = @name AND
-            password = @password";
+            FROM Usuario
+            WHERE UserName = @name AND
+            Password = @password";
 
             command.Parameters.AddWithValue("@name", user.name);
             command.Parameters.AddWithValue("@password", user.password);
@@ -40,7 +41,7 @@ public class UserDAO
             }
 
             reader.Read();
-            var userTypeId = reader.GetUInt64("user_type_id");
+            var userTypeId = reader.GetInt64("RolId");
 
             reader.Close();
             command.Dispose();
@@ -49,16 +50,16 @@ public class UserDAO
 
             command.CommandText =
             @"SELECT
-                name
-            FROM user_type
-            WHERE id = @userTypeId";
+                Nombre
+            FROM Rol
+            WHERE RolId = @userTypeId";
 
             command.Parameters.AddWithValue("@userTypeId", userTypeId);
 
             reader = command.ExecuteReader();
             reader.Read();
 
-            var userType = reader.GetString("name");
+            var userType = reader.GetString("Nombre");
 
             var key = "n9EW1FOGFiZ9sJJnap1VqGjO3anEnpcstsygTdVdeme2JwkMMCdmJ6bmn4vSQMrWxkSGlfPm/djrvCvvN/J8kA==";
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -66,8 +67,8 @@ public class UserDAO
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]{
-                    new Claim("name", user.name),
-                    new Claim("user_type", userType),
+                    new Claim("UserName", user.name),
+                    new Claim("Nombre", userType),
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(byteKey), SecurityAlgorithms.HmacSha256Signature)
@@ -84,10 +85,10 @@ public class UserDAO
         }
     }
 
-    public bool Exists(ulong userId)
+    public bool Exists(int userId)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -95,16 +96,16 @@ public class UserDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM user
-            WHERE id = @userId";
+                COUNT(UsuarioID)
+            FROM Usuario
+            WHERE UsuarioID = @userId";
 
             command.Parameters.AddWithValue("@userId", userId);
             reader = command.ExecuteReader();
 
             if (reader.Read())
             {
-                return reader.GetInt64(0) == 1;
+                return reader.GetInt32(0) == 1;
             }
             else
             {
@@ -120,8 +121,8 @@ public class UserDAO
 
     public bool Exists(string name)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -129,16 +130,16 @@ public class UserDAO
 
             command.CommandText =
             @"SELECT
-                COUNT(id)
-            FROM user
-            WHERE name = @name";
+                COUNT(UsuarioID)
+            FROM Usuario
+            WHERE Nombre = @name";
 
             command.Parameters.AddWithValue("@name", name);
             reader = command.ExecuteReader();
 
             if (reader.Read())
             {
-                return reader.GetInt64(0) == 1;
+                return reader.GetInt32(0) == 1;
             }
             else
             {
@@ -152,10 +153,10 @@ public class UserDAO
         }
     }
 
-    public User? Get(ulong graduateId)
+    public User? Get(int graduateId)
     {
-        MySqlCommand? command = null;
-        MySqlDataReader? reader = null;
+        SqlCommand? command = null;
+        SqlDataReader? reader = null;
 
         try
         {
@@ -165,13 +166,13 @@ public class UserDAO
             @"SELECT
 	            u.* 
               FROM
-	            graduate g
-              JOIN graduate_user gu  ON
-	               g.id  = gu.graduate_id 
-              JOIN user u ON
-	               gu.user_id  = u.id
+	            Participante p
+              JOIN Egresado e ON
+	               p.ParticipanteId  = e.EgresadoId 
+              JOIN Usuario u ON
+	               p.ParticipanteId  = u.UsuarioId
               WHERE
-	              g.id = @graduateId;";
+	              e.EgresadoId = @graduateId;";
 
             command.Parameters.AddWithValue("@graduateId", graduateId);
             reader = command.ExecuteReader();
@@ -180,9 +181,9 @@ public class UserDAO
             {
                 return new User
                 {
-                    id = reader.GetUInt64("id"),
-                    name = reader.GetString("name"),
-                    password = reader.GetString("password")
+                    id = reader.GetInt32("UsuarioID"),
+                    name = reader.GetString("UserName"),
+                    password = reader.GetString("Password")
                 };
             }
 
@@ -195,26 +196,26 @@ public class UserDAO
         }
     }
 
-    public long Create(User user)
+    public int Create(User user)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"INSERT INTO user(
-                name,
-                password,
-                user_type_id
+            @"INSERT INTO Usuario(
+                RolId,
+                UserName,
+                Password
             )VALUES(
-                @name, 
-                @password,
                 (SELECT
-                    id
-                FROM user_type
-                WHERE name = 'GRADUATE')
+                    RolId
+                FROM Rol
+                WHERE Nombre = 'Egresado'),
+                @name, 
+                @password
             );";
 
             command.Parameters.AddWithValue("@name", user.name);
@@ -224,7 +225,7 @@ public class UserDAO
 
             if (count == 1)
             {
-                return command.LastInsertedId;
+                return Convert.ToInt32(command.ExecuteScalar());
             }
             else
             {
@@ -239,17 +240,17 @@ public class UserDAO
 
     public bool Update(User user)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"UPDATE user SET
-                name = @name,
-                password = @password
-            WHERE id = @userId;";
+            @"UPDATE Usuario SET
+                Nombre = @name,
+                Password = @password
+            WHERE UsuarioID = @userId;";
 
             command.Parameters.AddWithValue("@userId", user.id);
 
@@ -261,17 +262,17 @@ public class UserDAO
         }
     }
 
-    public bool Delete(ulong userId)
+    public bool Delete(int userId)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"DELETE FROM user
-            WHERE id = @userId";
+            @"DELETE FROM Usuario
+            WHERE UsuarioID = @userId";
 
             command.Parameters.AddWithValue("@userId", userId);
 
@@ -283,17 +284,17 @@ public class UserDAO
         }
     }
 
-    public bool UnjoinGraduate(ulong graduateId)
+    public bool UnjoinGraduate(int graduateId)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"DELETE FROM graduate_user
-            WHERE graduate_id = @graduateId;";
+            @"DELETE FROM Participante
+            WHERE UsuarioId = @graduateId;";
 
             command.Parameters.AddWithValue("@graduateId", graduateId);
 
@@ -305,21 +306,21 @@ public class UserDAO
         }
     }
 
-    public bool DeleteByGraduate(ulong graduateId)
+    public bool DeleteByGraduate(int graduateId)
     {
-        MySqlCommand? command = null;
+        SqlCommand? command = null;
 
         try
         {
             command = connection.CreateCommand();
 
             command.CommandText =
-            @"DELETE FROM user
-            WHERE id = (
+            @"DELETE FROM Usuario
+            WHERE UsuarioID = (
                 SELECT
-                    user_id
-                FROM graduate_user
-                WHERE graduate_id = @graduateId
+                    Usuarioid
+                FROM Participante
+                WHERE UsuarioId = @graduateId
             );";
 
             command.Parameters.AddWithValue("@graduateId", graduateId);

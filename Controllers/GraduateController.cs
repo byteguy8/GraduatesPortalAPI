@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using GraduatesPortalAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace UsersAPI.Controllers;
 
@@ -9,6 +11,272 @@ namespace UsersAPI.Controllers;
 
 public class GraduateController : Controller
 {
+    [HttpGet("Busqueda")]
+    public IResult Busqueda(String valor, int limit,int offset){
+
+        PortalEgresadosContext? context = null;
+
+        try
+        {
+            context = new PortalEgresadosContext();
+
+            var busqueda = context
+                .Egresados
+                .Where(b => EF.Functions.Like(b.PrimerNombre, $"%{valor}%") || EF.Functions.Like (b.PrimerApellido, $"%{valor}%" ))
+                .OrderBy(b => b.PrimerNombre)
+                .Skip(offset * limit)
+                .Take(limit)
+                .ToList();
+
+            var Egresado = new List<Egresado>();
+
+            if (Egresado.Any()){
+
+                
+                return null;
+            }
+
+            foreach (var item in busqueda){
+
+                var EgresadoId = item.EgresadoId;
+                var PrimerNombre = item.PrimerNombre;
+                var SegundoNombre = item.SegundoNombre;
+                var PrimerApellido = item.PrimerApellido;
+                var SegundoApellido = item.SegundoApellido;
+                var DocumentoEgresados = item.Participante.Documentos;
+                var Genero = item.Genero;
+                var FechaNac = item.FechaNac;
+                var FotoPerfilUrl = item.Participante.FotoPerfilUrl;
+                var Nacionalidad = item.NacionalidadNavigation.Nombre;
+                var EgresadoIdioma = item.EgresadoIdiomas;
+                var ExperienciaLaboral = item.ExperienciaLaborals;
+                var Educacion = item.Educacions;
+                var Contacto = item.Participante.Contactos;
+                var EgresadoHabilidad = item.EgresadoHabilidads;
+
+
+                dynamic Egresados = new
+                {
+                    EgresadoId = EgresadoId,
+                    PrimerNombre = PrimerNombre,
+                    SegundoNombre = SegundoNombre,
+                    PrimerApellido = PrimerApellido,
+                    SegundoApellido = SegundoApellido,
+                    DocumentoEgresados = DocumentoEgresados,
+                    Genero = Genero,
+                    FechaNac = FechaNac,
+                    FotoPerfilUrl = FotoPerfilUrl,
+                    Nacionalidad = Nacionalidad,
+                    EgresadoIdiomas = EgresadoIdioma,
+                    ExperienciaLaborals = ExperienciaLaboral,
+                    Educacions = Educacion,
+                    Contacto = Contacto,
+                    EgresadoHabilidads = EgresadoHabilidad
+                };
+
+                Egresado.Add(Egresados);
+            }
+
+            return Results.Json(
+                data: Egresado,
+                statusCode: StatusCodes.Status200OK
+            );
+        }
+        
+                catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            return Results.Json(
+                data: new ErrorResult(0, "Unexpected server error"),
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
+
+    [HttpGet("BusquedaId")]
+    public IResult BusquedaId(int IdEgresado){
+
+        PortalEgresadosContext? context = null;
+
+        try
+        {
+            context = new PortalEgresadosContext();
+
+            var busqueda = context
+                .Egresados
+                .Where(b => b.EgresadoId == IdEgresado)
+                .OrderBy(b => b.PrimerNombre)
+                .ToList();
+
+            var Egresado = new List<Egresado>();
+
+
+
+            foreach (var item in busqueda){
+
+                var EgresadoId = item.EgresadoId;
+                var PrimerNombre = item.PrimerNombre;
+                var SegundoNombre = item.SegundoNombre;
+                var PrimerApellido = item.PrimerApellido;
+                var SegundoApellido = item.SegundoApellido;
+                var DocumentoEgresados = item.Participante.Documentos;
+                var Genero = item.Genero;
+                var FechaNac = item.FechaNac;
+                var FotoPerfilUrl = item.Participante.FotoPerfilUrl;
+                var Nacionalidad = item.NacionalidadNavigation.Nombre;
+                var EgresadoIdioma = item.EgresadoIdiomas;
+                var ExperienciaLaboral = item.ExperienciaLaborals;
+                var Educacion = item.Educacions;
+                var Contacto = item.Participante.Contactos;
+                var EgresadoHabilidad = item.EgresadoHabilidads;
+
+
+                dynamic Egresados = new
+                {
+                    EgresadoId = EgresadoId,
+                    PrimerNombre = PrimerNombre,
+                    SegundoNombre = SegundoNombre,
+                    PrimerApellido = PrimerApellido,
+                    SegundoApellido = SegundoApellido,
+                    DocumentoEgresados = DocumentoEgresados,
+                    Genero = Genero,
+                    FechaNac = FechaNac,
+                    FotoPerfilUrl = FotoPerfilUrl,
+                    Nacionalidad = Nacionalidad,
+                    EgresadoIdiomas = EgresadoIdioma,
+                    ExperienciaLaborals = ExperienciaLaboral,
+                    Educacions = Educacion,
+                    Contacto = Contacto,
+                    EgresadoHabilidads = EgresadoHabilidad
+                };
+
+                Egresado.Add(Egresados);
+            }
+
+            return Results.Json(
+                data: Egresado,
+                statusCode: StatusCodes.Status200OK
+            );
+        }
+        
+                catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            return Results.Json(
+                data: new ErrorResult(0, "Unexpected server error"),
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
+
+    [HttpGet("EgresadoIdioma")]
+    public IResult EgresadoIdioma(int IdEgresado){
+
+        PortalEgresadosContext? context = null;
+
+        try
+        {
+            context = new PortalEgresadosContext();
+
+            var getidiomas = context
+            .Egresados
+            .Where(e => e.EgresadoId == IdEgresado)
+            .SelectMany(e => e.EgresadoIdiomas)
+            .Select(ei => ei.Idioma)
+            .ToList();
+
+            var idiomas = new List<Idioma>();
+
+            foreach (var item in getidiomas){
+
+                var idiomaId = item.IdiomaId;
+                var Egreidioma = item.Nombre;
+
+                var idioma = new Idioma
+                {
+                    IdiomaId = idiomaId,
+                    Nombre = Egreidioma
+
+                };
+
+                idiomas.Add(idioma);
+        
+            }
+
+            return Results.Json(
+                data: idiomas,
+                statusCode: StatusCodes.Status200OK
+            );
+
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            return Results.Json(
+                data: new ErrorResult(0, "Unexpected server error"),
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+
+        }
+
+    }
+
+    [HttpPost("EgresadoIdioma")]
+    public IResult PostEgresadoIdioma(int IdEgresado){
+
+        PortalEgresadosContext? context = null;
+
+        try
+        {
+            context = new PortalEgresadosContext();
+
+            var getidiomas = context
+            .Egresados
+            .Where(e => e.EgresadoId == IdEgresado)
+            .SelectMany(e => e.EgresadoIdiomas)
+            .Select(ei => ei.Idioma)
+            .ToList();
+
+            var idiomas = new List<Idioma>();
+
+            foreach (var item in getidiomas){
+
+                var idiomaId = item.IdiomaId;
+                var Egreidioma = item.Nombre;
+
+                var idioma = new Idioma
+                {
+                    IdiomaId = idiomaId,
+                    Nombre = Egreidioma
+
+                };
+
+                idiomas.Add(idioma);
+        
+            }
+
+            return Results.Json(
+                data: idiomas,
+                statusCode: StatusCodes.Status200OK
+            );
+
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+
+            return Results.Json(
+                data: new ErrorResult(0, "Unexpected server error"),
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+
+        }
+
+    }
+
     [HttpGet("Count")]
     public IResult Count()
     {
@@ -38,8 +306,8 @@ public class GraduateController : Controller
         }
     }
 
-    [HttpGet("Paging/{offset}/{limit}")]
-    public IResult Paging(ulong offset, ulong limit)
+    [HttpGet("Paging/{offset}/{fetch}")]
+    public IResult Paging(int offset, int fetch)
     {
         var connection = Database.GetConnection();
 
@@ -48,7 +316,7 @@ public class GraduateController : Controller
             var graduateDAO = new GraduateDAO(connection);
             var nationalityDAO = new NationalityDAO(connection);
 
-            var graduates = graduateDAO.PagingMinimum(offset, limit);
+            var graduates = graduateDAO.PagingMinimum(offset, fetch);
 
             foreach (var graduate in graduates)
             {
@@ -62,7 +330,7 @@ public class GraduateController : Controller
                     );
                 }
 
-                graduate.nationality = nationality;
+                graduate.Nacionalidad = nationality;
             }
 
             return Results.Json(
@@ -86,7 +354,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("{graduateId}"), Authorize]
-    public IResult GetById(ulong graduateId)
+    public IResult GetById(int graduateId)
     {
         if (HttpContext.User.Identity is not ClaimsIdentity identity)
         {
@@ -115,7 +383,7 @@ public class GraduateController : Controller
                 );
             }
 
-            ulong? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
+            int? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
 
             if (graduateId != retrievedGraduateId)
             {
@@ -164,7 +432,7 @@ public class GraduateController : Controller
             }
 
             graduate.user = user;
-            graduate.nationality = nationality;
+            graduate.Nacionalidad = nationality;
             graduate.emails = graduateContactDAO.GetEmails(graduate.id);
             graduate.addresses = graduateContactDAO.GetAddresses(graduate.id);
             graduate.telephones = graduateContactDAO.GetTelephones(graduate.id);
@@ -213,7 +481,7 @@ public class GraduateController : Controller
                     );
                 }
 
-                graduate.nationality = nationality;
+                graduate.Nacionalidad = nationality;
             }
 
             return Results.Json(
@@ -237,7 +505,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("Telephones")]
-    public IResult GetTelephones(ulong graduate_id)
+    public IResult GetTelephones(int graduate_id)
     {
         var connection = Database.GetConnection();
 
@@ -262,7 +530,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("Emails")]
-    public IResult GetEmails(ulong graduate_id)
+    public IResult GetEmails(int graduate_id)
     {
         var connection = Database.GetConnection();
         try
@@ -286,7 +554,7 @@ public class GraduateController : Controller
     }
 
     [HttpGet("Addresses")]
-    public IResult GetAddresses(ulong graduate_id)
+    public IResult GetAddresses(int graduate_id)
     {
         var connection = Database.GetConnection();
 
@@ -322,10 +590,10 @@ public class GraduateController : Controller
             var graduateDAO = new GraduateDAO(connection);
             var GraduateContactDAO = new GraduateContactDAO(connection);
 
-            if (graduateDAO.ExistsIdentification(graduate.identification))
+            if (graduateDAO.ExistsIdentification(graduate.Identificacion))
             {
                 transaction.Rollback();
-                return Results.BadRequest(new ErrorResult(0, "There is another graduate with the same identification"));
+                return Results.BadRequest(new ErrorResult(0, "Existe otro egresado con la misma identificación."));
             }
 
             if (userDAO.Exists(graduate.user.name))
@@ -355,7 +623,7 @@ public class GraduateController : Controller
                 GraduateContactDAO.CreateEmail(graduateId, email);
             }
 
-            foreach (string telephone in graduate.telephones)
+           /* foreach (string telephone in graduate.telephones)
             {
                 if (GraduateContactDAO.ExistsTelephone(telephone))
                 {
@@ -364,7 +632,7 @@ public class GraduateController : Controller
                 }
 
                 GraduateContactDAO.CreateTelephone(graduateId, telephone);
-            }
+            }*/
 
             transaction.Commit();
 
@@ -423,7 +691,7 @@ public class GraduateController : Controller
                 );
             }
 
-            ulong? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
+            int? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
 
             //Only if the graduate's id requested from the token and the graduate's id
             //from the request (argument in the function) match, the operation can be carry out
@@ -463,7 +731,7 @@ public class GraduateController : Controller
 
     [Authorize]
     [HttpDelete("{graduateId}")]
-    public IResult Delete(ulong graduateId)
+    public IResult Delete(int graduateId)
     {
         var connection = Database.GetConnection();
         var transaction = connection.BeginTransaction();
@@ -499,7 +767,7 @@ public class GraduateController : Controller
                 );
             }
 
-            ulong? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
+            int? retrievedGraduateId = graduateDAO.GetGraduateIdByUsername(nameClaim.Value);
 
             //Only if the graduate's id requested from the token and the graduate's id
             //from the request (argument in the function) match, the operation can be carry out

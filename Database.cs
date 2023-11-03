@@ -1,20 +1,14 @@
-using MySqlConnector;
+using System;
+using System.Data.SqlClient;
 
 public class Database
 {
-    public static MySqlConnection GetConnection()
+    public static SqlConnection GetConnection()
     {
-        var builder = new MySqlConnectionStringBuilder
-        {
-            Server = "db4free.net",
-            UserID = "popeye2",
-            Password = "Saltaytopa15",
-            Database = "graduate_portal",
-            IgnoreCommandTransaction = true,
-            Port = 3306
-        };
+        var connectionString = "Data Source=34.23.161.151;Initial Catalog=PortalEgresados;User ID=backend;Password=@uasd809@";
+        //var connectionString = "Data Source=localhost\\MONOGRAFICO53;Initial Catalog=PortalEgresados;User ID=sa;Password=Ab123456";
 
-        var connection = new MySqlConnection(builder.ConnectionString);
+        var connection = new SqlConnection(connectionString);
         connection.Open();
 
         return connection;
